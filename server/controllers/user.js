@@ -96,12 +96,6 @@ exports.applyCouponToUserCart = async (req, res) => {
 
   const user = await User.findOne({ email: req.user.email }).exec();
 
-  // let { products, cartTotal } = await (
-  //   await Cart.findOne({ orderdBy: user._id })
-  // )
-  //   .populat("products.product", "_id title price")
-  //   .exec();
-
   let { products, cartTotal } = await Cart.findOne({ orderdBy: user._id })
     .populate("products.product", "_id title price")
     .exec();
@@ -126,7 +120,10 @@ exports.applyCouponToUserCart = async (req, res) => {
 };
 
 exports.createOrder = async (req, res) => {
-  const { paymentIntent } = req.body.stripeReponse
+  // console.log(req.body);
+  // return;
+  const { paymentIntent } = req.body.stripeResponse;
+
   const user = await User.findOne({ email: req.user.email }).exec();
 
   let { products } = await Cart.findOne({ orderdBy: user._id }).exec();
@@ -136,7 +133,7 @@ exports.createOrder = async (req, res) => {
     paymentIntent,
     orderdBy: user._id,
   }).save();
-  
+
   console.log("NEW ORDER SAVED", newOrder);
   res.json({ ok: true });
 };
