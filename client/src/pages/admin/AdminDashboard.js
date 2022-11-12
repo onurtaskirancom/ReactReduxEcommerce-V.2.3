@@ -1,27 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminNav from "../../components/nav/AdminNav";
-import { getProductsByCount } from "../../functions/product";
-import AdminProductCard from "../../components/cards/AdminProductCard";
+import { getOrders, changeStatus } from "../../functions/admin";
+import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 const AdminDashboard = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const { user } = useSelector((state) => ({ ...state }));
 
   useEffect(() => {
-    loadAllProducts();
+    loadOrders();
   }, []);
 
-  const loadAllProducts = () => {
-    setLoading(true);
-    getProductsByCount(100)
-      .then((res) => {
-        setProducts(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setLoading(false);
-        console.log(err);
-      });
+  const loadOrders = () =>
+    getOrders(user.token).then((res) => {
+      console.log(JSON.stringify(res.data, null, 4));
+      setOrders(res.data);
+    });
+
+  const handleStatusChange = (orderId, orderStatus) => {
+    changeStatus(orderId, orderStatus, user.token).then((res) => {
+      toast.success("Status updated");
+      loadOrders();
+    });
   };
 
   return (
@@ -32,18 +33,8 @@ const AdminDashboard = () => {
         </div>
 
         <div className="col">
-          {loading ? (
-            <h4 className="text-danger">Loading...</h4>
-          ) : (
-            <h4>All Products</h4>
-          )}
-          <div className="row">
-            {products.map((product) => (
-              <div key={product._id} className="col-md-4">
-                <AdminProductCard product={product} />
-              </div>
-            ))}
-          </div>
+          <h4>Admin Dashboard</h4>
+          {JSON.stringify(orders)}
         </div>
       </div>
     </div>
