@@ -1,7 +1,5 @@
 const Order = require("../models/order");
-//const User = require("../models/user");
-
-//orders, orderStatus
+// const User = require("../models/user");
 
 exports.orders = async (req, res) => {
   let allOrders = await Order.find({})
@@ -13,11 +11,15 @@ exports.orders = async (req, res) => {
 };
 
 exports.orderStatus = async (req, res) => {
+  // console.log(req.body);
+  // return;
   const { orderId, orderStatus } = req.body;
 
-  let updated = await Order
-    .findByIdAndUpdate(orderId, { orderStatus }, { new: true })
-    .exec();
+  let updated = await Order.findByIdAndUpdate(
+    orderId,
+    { orderStatus },
+    { new: true }
+  ).exec();
 
   res.json(updated);
 };
