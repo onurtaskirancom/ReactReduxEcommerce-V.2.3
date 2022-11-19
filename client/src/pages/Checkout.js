@@ -6,6 +6,7 @@ import {
   emptyUserCart,
   saveUserAddress,
   applyCoupon,
+  createCashOrderForUser,
 } from "../functions/user";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -21,7 +22,7 @@ const Checkout = ({ history }) => {
   const [discountError, setDiscountError] = useState("");
 
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => ({ ...state }));
+  const { user, COD } = useSelector((state) => ({ ...state }));
 
   useEffect(() => {
     getUserCart(user.token).then((res) => {
@@ -87,8 +88,8 @@ const Checkout = ({ history }) => {
 
   const showAddress = () => (
     <>
-      <ReactQuill theme='snow' value={address} onChange={setAddress} />
-      <button className='btn btn-primary mt-2' onClick={saveAddressToDb}>
+      <ReactQuill theme="snow" value={address} onChange={setAddress} />
+      <button className="btn btn-primary mt-2" onClick={saveAddressToDb}>
         Save
       </button>
     </>
@@ -112,18 +113,25 @@ const Checkout = ({ history }) => {
           setDiscountError("");
         }}
         value={coupon}
-        type='text'
-        className='form-control'
+        type="text"
+        className="form-control"
       />
-      <button onClick={applyDiscountCoupon} className='btn btn-primary mt-2'>
+      <button onClick={applyDiscountCoupon} className="btn btn-primary mt-2">
         Apply
       </button>
     </>
   );
 
+  const createCashOrder = () => {
+    createCashOrderForUser(user.token).then((res) => {
+      console.log("USER CASH ORDER CREATED RES ", res);
+      // empty cart form redux, local Storage, reset coupon, reset COD, redirect
+    });
+  };
+
   return (
-    <div className='row'>
-      <div className='col-md-6'>
+    <div className="row">
+      <div className="col-md-6">
         <h4>Delivery Address</h4>
         <br />
         <br />
@@ -133,10 +141,10 @@ const Checkout = ({ history }) => {
         <br />
         {showApplyCoupon()}
         <br />
-        {discountError && <p className='bg-danger p-2'>{discountError}</p>}
+        {discountError && <p className="bg-danger p-2">{discountError}</p>}
       </div>
 
-      <div className='col-md-6'>
+      <div className="col-md-6">
         <h4>Order Summary</h4>
         <hr />
         <p>Products {products.length}</p>
@@ -146,27 +154,37 @@ const Checkout = ({ history }) => {
         <p>Cart Total: {total}</p>
 
         {totalAfterDiscount > 0 && (
-          <p className='bg-success p-2'>
+          <p className="bg-success p-2">
             Discount Applied: Total Payable: ${totalAfterDiscount}
           </p>
         )}
 
-        <div className='row'>
-          <div className='col-md-6'>
-            <button
-              className='btn btn-primary'
-              disabled={!addressSaved || !products.length}
-              onClick={() => history.push("/payment")}
-            >
-              Place Order
-            </button>
+        <div className="row">
+          <div className="col-md-6">
+            {COD ? (
+              <button
+                className="btn btn-primary"
+                disabled={!addressSaved || !products.length}
+                onClick={createCashOrder}
+              >
+                Place Order
+              </button>
+            ) : (
+              <button
+                className="btn btn-primary"
+                disabled={!addressSaved || !products.length}
+                onClick={() => history.push("/payment")}
+              >
+                Place Order
+              </button>
+            )}
           </div>
 
-          <div className='col-md-6'>
+          <div className="col-md-6">
             <button
               disabled={!products.length}
               onClick={emptyCart}
-              className='btn btn-primary'
+              className="btn btn-primary"
             >
               Empty Cart
             </button>
